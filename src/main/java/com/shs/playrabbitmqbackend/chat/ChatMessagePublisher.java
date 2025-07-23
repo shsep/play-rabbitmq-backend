@@ -11,9 +11,9 @@ public class ChatMessagePublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void publishMessage(String roomId, String message) {
+    public void publishMessage(String roomId, ChatMessage chatMessage) {
         // RabbitMQ에 메시지 발행
-        String formattedMessage = roomId + ":" + message; // 포맷: "roomId:message"
+        String formattedMessage = roomId + ":" + chatMessage.nickname() + ":" + chatMessage.message(); // 포맷: "roomId:message"
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, formattedMessage);
     }
 }
