@@ -17,6 +17,7 @@ public class ChatRoomManager {
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
+    private final ChatMessagePublisher chatMessagePublisher;
 
     public String createChatRoom(String creator, String title) {
         // 방 ID 생성
@@ -37,10 +38,6 @@ public class ChatRoomManager {
         return roomId;
     }
 
-    public Set<String> getChatRooms() {
-        return redisTemplate.opsForSet().members("chat:rooms");
-    }
-
     public List<ChatRoom> getAllChatRoomDetails() {
         // Redis에 저장된 모든 방 상세 정보를 가져오기
         Map<Object, Object> chatRoomsMap = redisTemplate.opsForHash().entries("chat:room:details");
@@ -57,8 +54,23 @@ public class ChatRoomManager {
             .toList();
     }
 
-    public void addUserToRoom(String roomId, String userId) {
-        redisTemplate.opsForSet().add("chat:room:" + roomId + ":users", userId);
+    public void addUserToRoom(String roomId, String nickname) {
+        // 이미 사용자가 채팅방에 있는지 확인
+        Boolean isMember = redisTemplate.opsForSet().isMember("chat:room:" + roomId + ":users", nickname);
+
+        if (Boolean.TRUE.equals(isMember)) {
+            throw new IllegalArgumentException("User " + nickname + " is already in the room " + roomId);
+        }
+
+        redisTemplate.opsForSet().add("chat:room:" + roomId + ":users", nickname);
+
+        chatMessagePublisher.publishMessage(roomId, new ChatMessage("SYSTEM", nickname + " has joined the room."));
+    }
+
+    public void removeUserFromRoom(String roomId, String nickname) {
+        redisTemplate.opsForSet().remove("chat:room:" + roomId + ":users", nickname);
+
+        chatMessagePublisher.publishMessage(roomId, new ChatMessage("SYSTEM", nickname + " has left the room."));
     }
 
     public Set<String> getUsersInRoom(String roomId) {

@@ -41,10 +41,28 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomManager.getAllChatRoomDetails());
     }
 
+    /**
+     * 사용자를 채팅방에 추가
+     * @param roomId 채팅방 ID
+     * @param nickname 추가할 사용자 닉네임
+     * @return 성공 메시지
+     */
     @PostMapping("/{roomId}/join")
-    public ResponseEntity<String> joinChatRoom(@PathVariable String roomId, @RequestParam String userId) {
-        chatRoomManager.addUserToRoom(roomId, userId);
-        return ResponseEntity.ok("User " + userId + " joined room " + roomId);
+    public ResponseEntity<String> joinChatRoom(@PathVariable String roomId, @RequestParam String nickname) {
+        chatRoomManager.addUserToRoom(roomId, nickname);
+        return ResponseEntity.ok("User " + nickname + " joined room " + roomId);
+    }
+
+    /**
+     * 사용자를 채팅방에서 제거
+     * @param roomId 채팅방 ID
+     * @param nickname 제거할 사용자 닉네임
+     * @return 성공 메시지
+     */
+    @PostMapping("/{roomId}/leave")
+    public ResponseEntity<String> leaveChatRoom(@PathVariable String roomId, @RequestParam String nickname) {
+        chatRoomManager.removeUserFromRoom(roomId, nickname);
+        return ResponseEntity.ok("User " + nickname + " left room " + roomId);
     }
 
     @PostMapping("/{roomId}/message")
