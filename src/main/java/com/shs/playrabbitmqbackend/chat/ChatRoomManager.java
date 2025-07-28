@@ -2,6 +2,7 @@ package com.shs.playrabbitmqbackend.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,6 +19,26 @@ public class ChatRoomManager {
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final ChatMessagePublisher chatMessagePublisher;
+
+    @PostConstruct
+    public void initialize() {
+        log.info("Initializing chat rooms - Clearing all users");
+
+        // Redis에서 저장된 모든 채팅방 ID 가져오기
+        Set<String> chatRooms = redisTemplate.opsForSet().members("chat:rooms");
+
+        if (chatRooms != null) {
+            for (String roomId : chatRooms) {
+                String userSetKey = "chat:room:" + roomId + ":users";
+
+                // 각 채팅방의 사용자 목록 초기화
+                redisTemplate.delete(userSetKey);
+                log.info("Cleared users for chat room: {}", roomId);
+            }
+        }
+
+        log.info("All chat rooms are initialized and cleared of users.");
+    }
 
     public String createChatRoom(String creator, String title) {
         // 방 ID 생성

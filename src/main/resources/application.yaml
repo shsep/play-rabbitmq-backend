@@ -2,3 +2,6 @@ spring.data.redis:
     host: localhost
     port: 6379
     database: 0
+
+ollama:
+    model: deepseek-r1:14b
