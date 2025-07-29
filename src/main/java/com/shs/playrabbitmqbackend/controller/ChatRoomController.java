@@ -42,6 +42,15 @@ public class ChatRoomController {
     }
 
     /**
+     * 채팅방 정보 가져오기
+     * @return 방의 상세 정보
+     */
+    @GetMapping("/{roomId}/details")
+    public ResponseEntity<ChatRoom> getChatRoomDetails(@PathVariable String roomId) {
+        return ResponseEntity.ok(chatRoomManager.getChatRoomDetails(roomId));
+    }
+
+    /**
      * 사용자를 채팅방에 추가
      * @param roomId 채팅방 ID
      * @param nickname 추가할 사용자 닉네임

@@ -75,6 +75,16 @@ public class ChatRoomManager {
             .toList();
     }
 
+    public ChatRoom getChatRoomDetails(String roomId) {
+        Object chatRoom = redisTemplate.opsForHash().entries("chat:room:details").get(roomId);
+        try {
+            return objectMapper.readValue(chatRoom.toString(), ChatRoom.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error while parsing chat room details", e);
+            return null;
+        }
+    }
+
     public void addUserToRoom(String roomId, String nickname) {
         // 이미 사용자가 채팅방에 있는지 확인
         Boolean isMember = redisTemplate.opsForSet().isMember("chat:room:" + roomId + ":users", nickname);
